@@ -1,0 +1,217 @@
+:root {
+    --primary-color: #4CAF50;
+    --bg-color: #f0f2f5;
+    --card-back: #2196F3;
+    --card-hover: #1976D2;
+    --text-color: #333;
+    --active-player: #ffeb3b;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+#app {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+}
+
+.screen {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ログイン画面 */
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+input {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.hint {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* ゲーム画面 */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.room-info {
+    font-weight: bold;
+    color: #666;
+}
+
+.status-bar {
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.scoreboard {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.player-card {
+    background: #eee;
+    padding: 10px 20px;
+    border-radius: 8px;
+    position: relative;
+    width: 45%;
+    transition: all 0.3s;
+}
+
+.player-card.active {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.player-card .name {
+    display: block;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+}
+
+.player-card .score {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* ゲームボード（カード一覧） */
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    aspect-ratio: 1;
+    /* 正方形を維持 */
+}
+
+.card {
+    background-color: var(--card-back);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    color: white;
+    user-select: none;
+    transition: transform 0.3s, background-color 0.3s;
+    position: relative;
+}
+
+.card:hover {
+    background-color: var(--card-hover);
+}
+
+.card.flipped,
+.card.matched {
+    background-color: white;
+    color: #333;
+    border: 2px solid var(--primary-color);
+    cursor: default;
+    transform: rotateY(180deg);
+    /* 簡易的な回転演出 */
+}
+
+/* カードの中身は最初隠すのではなく、JSで制御するが、
+   CSSだけで裏面を表現する場合は以下のような工夫が必要。
+   今回はシンプルに、.flipped クラスがついたらテキストを表示する方式にする。
+*/
+.card span {
+    display: none;
+}
+
+.card.flipped span,
+.card.matched span {
+    display: block;
+}
+
+.card.matched {
+    opacity: 0.6;
+    /* 揃ったカードは薄くする */
+}
+
+.role-badge {
+    margin-top: 20px;
+    font-size: 0.8rem;
+    color: #999;
+}
+
+/* モーダル */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.modal-content {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+    color: var(--primary-color);
+}

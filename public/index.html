@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>オンライン神経衰弱</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- ログイン（ルーム入室）画面 -->
+        <div id="login-screen" class="screen">
+            <h1>神経衰弱</h1>
+            <div class="input-group">
+                <input type="text" id="room-input" placeholder="ルームIDを入力" maxlength="10">
+                <button id="join-btn">参加 / 作成</button>
+            </div>
+            <p class="hint">友達と同じIDを入力して対戦しよう！</p>
+        </div>
+
+        <!-- ゲーム画面 -->
+        <div id="game-screen" class="screen hidden">
+            <div class="header">
+                <div class="room-info">Room: <span id="room-id-display"></span></div>
+                <div id="status-message" class="status-bar">対戦相手を待っています...</div>
+            </div>
+
+            <div class="scoreboard">
+                <div class="player-card" id="p1-card">
+                    <span class="name">Player 1</span>
+                    <span class="score" id="p1-score">0</span>
+                    <span class="indicator"></span>
+                </div>
+                <div class="player-card" id="p2-card">
+                    <span class="name">Player 2</span>
+                    <span class="score" id="p2-score">0</span>
+                    <span class="indicator"></span>
+                </div>
+            </div>
+
+            <div class="game-board" id="board">
+                <!-- カードがここに生成されます -->
+            </div>
+
+            <div id="role-display" class="role-badge">観戦中</div>
+        </div>
+
+        <!-- 結果モーダル -->
+        <div id="result-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2 id="winner-text">勝者: Player 1!</h2>
+                <button id="restart-btn" onclick="location.reload()">もう一度遊ぶ</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
