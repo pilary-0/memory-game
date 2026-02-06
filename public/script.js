@@ -165,11 +165,43 @@ socket.on('player_reconnected', (data) => {
 });
 
 // ゲーム終了
+// ゲーム終了
 socket.on('game_over', (data) => {
     elements.modal.classList.remove('hidden');
     elements.winnerText.textContent =
         data.winner === 'draw' ? '引き分け！' : `勝者: ${data.winner}`;
 });
+
+// ゲームリセット（再戦）
+socket.on('game_reset', (data) => {
+    elements.modal.classList.add('hidden');
+    elements.statusMessage.textContent = 'ゲーム再開！';
+
+    // 盤面とスコアの初期化
+    renderBoard(data.board);
+    updateTurn(data.turnIndex);
+
+    // スコア表示リセット
+    elements.players.forEach((p, i) => {
+        p.score.textContent = 0;
+    });
+});
+
+// --- 結果画面のボタン処理 ---
+// ボタンが存在するか確認してからイベントリスナーを追加（エラー防止）
+if (document.getElementById('rematch-btn')) {
+    document.getElementById('rematch-btn').addEventListener('click', () => {
+        socket.emit('request_rematch', { roomId: currentRoomId });
+    });
+}
+
+if (document.getElementById('home-btn')) {
+    document.getElementById('home-btn').addEventListener('click', () => {
+        socket.emit('leave_room', { roomId: currentRoomId });
+        elements.modal.classList.add('hidden');
+        backToHome();
+    });
+}
 
 
 // --- 描画・UI更新関数 ---
