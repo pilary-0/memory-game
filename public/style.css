@@ -183,9 +183,17 @@ button:hover {
    CSSだけで裏面を表現する場合は以下のような工夫が必要。
    今回はシンプルに、.flipped クラスがついたらテキストを表示する方式にする。
 */
+/* カードの内容を絶対配置にして、サイズ変化によるガタつきを完全防止 */
 .card span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     opacity: 0;
     transition: opacity 0.3s;
+    font-size: 2.5rem;
+    /* 絵文字サイズ固定 */
+    line-height: 1;
 }
 
 .card.flipped span,
@@ -195,7 +203,6 @@ button:hover {
 
 .card.matched {
     opacity: 0.6;
-    /* 揃ったカードは薄くする */
 }
 
 .role-badge {
@@ -223,9 +230,76 @@ button:hover {
     padding: 40px;
     border-radius: 12px;
     text-align: center;
+    width: 90%;
+    max-width: 400px;
 }
 
 .modal-content h2 {
     margin-bottom: 20px;
     color: var(--primary-color);
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.primary-btn {
+    background-color: var(--primary-color);
+    flex: 1;
+    min-width: 120px;
+}
+
+.secondary-btn {
+    background-color: #757575;
+    flex: 1;
+    min-width: 120px;
+}
+
+.secondary-btn:hover {
+    background-color: #616161;
+}
+
+/* モバイル最適化 & タッチ操作向上 */
+@media (max-width: 600px) {
+    #app {
+        padding: 10px;
+    }
+
+    .screen {
+        padding: 1.5rem 1rem;
+    }
+
+    .game-board {
+        gap: 8px;
+    }
+
+    .card {
+        border-width: 2px;
+    }
+
+    .player-card {
+        padding: 8px;
+    }
+
+    .player-card .score {
+        font-size: 1.2rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    /* モバイルでの絵文字サイズ調整 */
+    .card span {
+        font-size: 2rem;
+    }
+}
+
+button,
+.card,
+input {
+    touch-action: manipulation;
 }

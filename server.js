@@ -223,6 +223,29 @@ io.on('connection', (socket) => {
 
 
 
+    // 再戦要求（リセット）
+    socket.on('request_rematch', ({ roomId }) => {
+        const room = rooms[roomId];
+        if (!room) return;
+
+        // ゲーム状態をリセット
+        room.board = createBoard();
+        room.flippedCards = [];
+        room.turnIndex = 0; // Player 1 から開始
+        room.gameState = 'playing';
+        room.timer = null;
+
+        // スコアリセット
+        room.players.forEach(p => p.score = 0);
+
+        // 全員に通知してゲーム再開
+        io.to(roomId).emit('game_reset', {
+            board: room.board,
+            turnIndex: room.turnIndex,
+            players: room.players.map(p => ({ score: 0 }))
+        });
+    });
+
     // 退出処理 (明示的な退出)
     socket.on('leave_room', ({ roomId }) => {
         const room = rooms[roomId];
