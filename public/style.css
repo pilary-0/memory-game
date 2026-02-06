@@ -94,6 +94,18 @@ button:hover {
     font-size: 0.9rem;
     color: var(--primary-color);
     font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.leave-btn {
+    background-color: #f44336;
+    /* Red for exit */
+    font-size: 0.8rem;
+    padding: 5px 10px;
+}
+
+.leave-btn:hover {
+    background-color: #d32f2f;
 }
 
 .scoreboard {
@@ -114,7 +126,7 @@ button:hover {
 .player-card.active {
     background: var(--primary-color);
     color: white;
-    transform: scale(1.05);
+    /* transform: scale(1.05); */
     box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 }
 
@@ -141,6 +153,7 @@ button:hover {
 .card {
     background-color: var(--card-back);
     border-radius: 8px;
+    border: 2px solid transparent;
     cursor: pointer;
     display: flex;
     justify-content: center;

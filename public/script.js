@@ -46,6 +46,23 @@ elements.joinBtn.addEventListener('click', () => {
     socket.emit('join_room', { roomId, userId });
 });
 
+elements.leaveBtn = document.getElementById('leave-btn');
+elements.leaveBtn.addEventListener('click', () => {
+    if (confirm('ルームから退出しますか？')) {
+        socket.emit('leave_room', { roomId: currentRoomId });
+        backToHome();
+    }
+});
+
+function backToHome() {
+    screens.game.classList.add('hidden');
+    screens.login.classList.remove('hidden');
+    currentRoomId = null;
+    elements.board.innerHTML = '';
+    elements.statusMessage.textContent = '';
+    isMyTurn = false;
+}
+
 // カードクリック処理
 function handleCardClick(index) {
     if (!isMyTurn) return;
