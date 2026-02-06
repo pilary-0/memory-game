@@ -184,12 +184,13 @@ button:hover {
    今回はシンプルに、.flipped クラスがついたらテキストを表示する方式にする。
 */
 .card span {
-    display: none;
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
 .card.flipped span,
 .card.matched span {
-    display: block;
+    opacity: 1;
 }
 
 .card.matched {

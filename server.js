@@ -221,62 +221,58 @@ io.on('connection', (socket) => {
         }
     });
 
-    room.timer = null;
-}, 1000); // 1秒後に裏返す
-            }
-        }
-    });
 
-// 退出処理 (明示的な退出)
-socket.on('leave_room', ({ roomId }) => {
-    const room = rooms[roomId];
-    if (!room) return;
 
-    console.log(`User left room ${roomId}: ${socket.id}`);
-    socket.leave(roomId);
-
-    // プレイヤーの場合
-    const player = room.players.find(p => p.id === socket.id);
-    if (player) {
-        player.connected = false;
-        io.to(roomId).emit('player_disconnected', {
-            playerIndex: room.players.indexOf(player)
-        });
-    }
-    // 観戦者の場合
-    else {
-        const spectatorIndex = room.spectators.indexOf(socket.id);
-        if (spectatorIndex !== -1) {
-            room.spectators.splice(spectatorIndex, 1);
-        }
-    }
-});
-
-// 切断処理
-socket.on('disconnect', () => {
-    // 所属していたルームを探す
-    // roomsはroomIdキーのオブジェクトなのでループで探す（効率は良くないが今回は小規模なのでOK）
-    for (const roomId in rooms) {
+    // 退出処理 (明示的な退出)
+    socket.on('leave_room', ({ roomId }) => {
         const room = rooms[roomId];
-        const player = room.players.find(p => p.id === socket.id);
+        if (!room) return;
 
+        console.log(`User left room ${roomId}: ${socket.id}`);
+        socket.leave(roomId);
+
+        // プレイヤーの場合
+        const player = room.players.find(p => p.id === socket.id);
         if (player) {
-            console.log(`Player disconnected from room ${roomId}`);
-            player.connected = false; // 切断状態にするが削除はしない
+            player.connected = false;
             io.to(roomId).emit('player_disconnected', {
                 playerIndex: room.players.indexOf(player)
             });
-
-            // もし両方とも長期間いない場合などのクリーンアップ処理は今回は省略
-        } else {
-            // 観戦者の削除
+        }
+        // 観戦者の場合
+        else {
             const spectatorIndex = room.spectators.indexOf(socket.id);
             if (spectatorIndex !== -1) {
                 room.spectators.splice(spectatorIndex, 1);
             }
         }
-    }
-});
+    });
+
+    // 切断処理
+    socket.on('disconnect', () => {
+        // 所属していたルームを探す
+        // roomsはroomIdキーのオブジェクトなのでループで探す（効率は良くないが今回は小規模なのでOK）
+        for (const roomId in rooms) {
+            const room = rooms[roomId];
+            const player = room.players.find(p => p.id === socket.id);
+
+            if (player) {
+                console.log(`Player disconnected from room ${roomId}`);
+                player.connected = false; // 切断状態にするが削除はしない
+                io.to(roomId).emit('player_disconnected', {
+                    playerIndex: room.players.indexOf(player)
+                });
+
+                // もし両方とも長期間いない場合などのクリーンアップ処理は今回は省略
+            } else {
+                // 観戦者の削除
+                const spectatorIndex = room.spectators.indexOf(socket.id);
+                if (spectatorIndex !== -1) {
+                    room.spectators.splice(spectatorIndex, 1);
+                }
+            }
+        }
+    });
 });
 
 const PORT = process.env.PORT || 3000;
