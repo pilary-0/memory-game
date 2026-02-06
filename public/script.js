@@ -7,7 +7,7 @@ const screens = {
 };
 const elements = {
     roomInput: document.getElementById('room-input'),
-    joinBtn: document.getElementById('join-btn'),
+    // joinBtn: document.getElementById('join-btn'), // 削除済み
     roomIdDisplay: document.getElementById('room-id-display'),
     statusMessage: document.getElementById('status-message'),
     board: document.getElementById('board'),
@@ -36,14 +36,65 @@ if (!userId) {
 
 // --- イベントリスナー ---
 
-elements.joinBtn.addEventListener('click', () => {
+// --- イベントリスナー ---
+
+// 「ルームを作る」ボタン
+document.getElementById('mode-create').addEventListener('click', () => {
+    // 6桁のランダムな数字IDを生成
+    const newRoomId = Math.floor(100000 + Math.random() * 900000).toString();
+    currentRoomId = newRoomId;
+
+    // UI切り替え
+    document.querySelector('.menu-actions').classList.add('hidden');
+    document.getElementById('create-view').classList.remove('hidden');
+    document.getElementById('generated-room-id').textContent = newRoomId;
+
+    // 自動的に入室 (待機状態)
+    socket.emit('join_room', { roomId: newRoomId, userId });
+});
+
+// 「ルームに参加する」ボタン
+document.getElementById('mode-join').addEventListener('click', () => {
+    document.querySelector('.menu-actions').classList.add('hidden');
+    document.getElementById('join-view').classList.remove('hidden');
+});
+
+// 「参加する（確定）」ボタン
+document.getElementById('join-confirm-btn').addEventListener('click', joinRoom);
+
+function joinRoom() {
     const roomId = elements.roomInput.value.trim();
     if (!roomId) {
         alert('ルームIDを入力してください');
         return;
     }
+    // 半角数字以外が含まれていたら警告（オプション）
     currentRoomId = roomId;
     socket.emit('join_room', { roomId, userId });
+}
+
+// IDコピーボタン
+document.getElementById('copy-btn').addEventListener('click', () => {
+    const text = document.getElementById('generated-room-id').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('IDをコピーしました: ' + text);
+    });
+});
+
+// 「戻る」ボタン
+document.querySelectorAll('.back-link').forEach(btn => {
+    btn.addEventListener('click', () => {
+        // もし入室済みなら退出処理
+        if (currentRoomId) {
+            socket.emit('leave_room', { roomId: currentRoomId });
+            currentRoomId = null;
+        }
+
+        document.getElementById('create-view').classList.add('hidden');
+        document.getElementById('join-view').classList.add('hidden');
+        document.querySelector('.menu-actions').classList.remove('hidden');
+        elements.roomInput.value = '';
+    });
 });
 
 elements.leaveBtn = document.getElementById('leave-btn');

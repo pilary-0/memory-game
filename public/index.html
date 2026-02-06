@@ -13,11 +13,28 @@
         <!-- ログイン（ルーム入室）画面 -->
         <div id="login-screen" class="screen">
             <h1>神経衰弱</h1>
-            <div class="input-group">
-                <input type="text" id="room-input" placeholder="ルームIDを入力" maxlength="10">
-                <button id="join-btn">参加 / 作成</button>
+
+            <div class="menu-actions">
+                <button id="mode-create" class="big-btn">ルームを作る</button>
+                <button id="mode-join" class="big-btn secondary">ルームに参加する</button>
             </div>
-            <p class="hint">友達と同じIDを入力して対戦しよう！</p>
+
+            <!-- ルーム作成後の待機画面 -->
+            <div id="create-view" class="sub-screen hidden">
+                <p>あなたのルームID</p>
+                <div class="room-id-box" id="generated-room-id">---</div>
+                <p class="instruction">この番号を相手に教えてください</p>
+                <button id="copy-btn" class="action-btn">IDをコピー</button>
+                <div class="waiting-spinner">対戦相手を待っています...</div>
+                <button class="back-link">戻る</button>
+            </div>
+
+            <!-- ルーム参加入力画面 -->
+            <div id="join-view" class="sub-screen hidden">
+                <input type="text" id="room-input" placeholder="ルームIDを入力" maxlength="10">
+                <button id="join-confirm-btn" class="action-btn">参加する</button>
+                <button class="back-link">戻る</button>
+            </div>
         </div>
 
         <!-- ゲーム画面 -->
