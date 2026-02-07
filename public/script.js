@@ -124,9 +124,16 @@ elements.leaveBtn.addEventListener('click', () => {
 function backToHome() {
     screens.game.classList.add('hidden');
     screens.login.classList.remove('hidden');
+
+    // サブ画面を隠し、初期のメニューボタンを表示
+    document.getElementById('create-view').classList.add('hidden');
+    document.getElementById('join-view').classList.add('hidden');
+    document.querySelector('.menu-actions').classList.remove('hidden');
+
     currentRoomId = null;
     elements.board.innerHTML = '';
     elements.statusMessage.textContent = '';
+    elements.roomInput.value = '';
     isMyTurn = false;
 }
 
@@ -290,9 +297,9 @@ function renderBoard(boardData) {
         if (card.state === 'flipped' || card.state === 'matched') {
             div.classList.add('flipped');
             if (card.state === 'matched') div.classList.add('matched');
-            div.innerHTML = `<span>${card.value}</span>`;
+            div.innerHTML = `<img src="${card.value}" alt="card">`;
         } else {
-            div.innerHTML = `<span></span>`; // 中身は隠す
+            div.innerHTML = `<img src="" alt="">`; // 中身は隠す
         }
 
         // クリックイベント
@@ -303,12 +310,12 @@ function renderBoard(boardData) {
 
 function flipCardVisual(el, value) {
     el.classList.add('flipped');
-    el.innerHTML = `<span>${value}</span>`;
+    el.innerHTML = `<img src="${value}" alt="card">`;
 }
 
 function unflipCardVisual(el) {
     el.classList.remove('flipped');
-    el.innerHTML = `<span></span>`;
+    el.innerHTML = `<img src="" alt="">`;
 }
 
 function updateTurn(turnIndex) {

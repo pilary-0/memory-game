@@ -22,8 +22,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 // }
 const rooms = {};
 
-// カードの絵柄（8ペア）
-const EMOJIS = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
+// カードの画像（8ペア）- 画像ファイルのパスを使用
+const IMAGES = [
+    '/images/Glory4lyfeWoods_map_v4_marked_10.png',
+    '/images/Google_AI_Studio_2026-01-03T02_07_04.116Z.png',
+    '/images/c6552090-17ec-45a8-957e-83e6b1a4cf9a.png',
+    '/images/f2fbc8d9-a495-46ce-b57e-aafa5ac72b21.png',
+    '/images/f7c45c57-df7e-473c-8237-0255b10177be (1).png',
+    '/images/f7c45c57-df7e-473c-8237-0255b10177be.png',
+    '/images/pirari.png',
+    '/images/カレーパンマン.png'
+];
 
 // シャッフル関数
 function shuffle(array) {
@@ -37,11 +46,11 @@ function shuffle(array) {
 // 新しいゲームボードを作成
 function createBoard() {
     const cards = [];
-    // 8種類の絵柄を2枚ずつ追加
-    [...EMOJIS, ...EMOJIS].forEach((emoji, index) => {
+    // 8種類の画像を2枚ずつ追加
+    [...IMAGES, ...IMAGES].forEach((image, index) => {
         cards.push({
             id: index,
-            value: emoji,
+            value: image,
             state: 'hidden' // hidden, flipped, matched
         });
     });

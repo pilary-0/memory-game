@@ -169,21 +169,60 @@ body {
 }
 
 .status-bar {
-    font-size: 0.9rem;
-    color: var(--primary-color);
-    font-weight: bold;
-    margin-bottom: 10px;
+    font-size: 1rem;
+    color: var(--accent-color);
+    font-weight: 800;
+    margin-bottom: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 10px;
+    text-shadow: 0 0 5px rgba(255, 171, 64, 0.5);
+    border: 1px solid rgba(255, 171, 64, 0.3);
 }
 
 .leave-btn {
-    background-color: #f44336;
-    /* Red for exit */
-    font-size: 0.8rem;
-    padding: 5px 10px;
+    background: #ff1744;
+    /* Brighter red */
+    color: white;
+    font-size: 0.9rem;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(255, 23, 68, 0.4);
+    transition: 0.3s;
 }
 
 .leave-btn:hover {
-    background-color: #d32f2f;
+    background: #d50000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 23, 68, 0.6);
+}
+
+/* ルーム参加入力画面の改善 */
+#join-view input {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.2rem;
+    border-radius: 12px;
+    border: 2px solid var(--secondary-color);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    margin-bottom: 20px;
+    text-align: center;
+    letter-spacing: 2px;
+    transition: 0.3s;
+}
+
+#join-view input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+}
+
+#join-view input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .scoreboard {
@@ -258,20 +297,22 @@ body {
     cursor: default;
 }
 
-.card span {
+/* カード内の画像スタイル */
+.card img {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) rotateY(180deg);
+    width: 80%;
+    height: 80%;
+    object-fit: cover;
+    border-radius: 8px;
     opacity: 0;
     transition: opacity 0.3s ease;
-    font-size: 3rem;
-    line-height: 1;
-    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
 }
 
-.card.flipped span,
-.card.matched span {
+.card.flipped img,
+.card.matched img {
     opacity: 1;
 }
 
