@@ -147,12 +147,29 @@ function handleCardClick(index) {
 
 // ルーム入室完了
 socket.on('room_joined', (data) => {
-    // 画面切り替え
-    screens.login.classList.add('hidden');
-    screens.game.classList.remove('hidden');
-
     elements.roomIdDisplay.textContent = data.roomId;
     myPlayerIndex = data.playerIndex;
+
+    // 待機中の場合はゲーム画面に遷移しない（create-viewに滞在）
+    if (data.gameState === 'waiting') {
+        elements.statusMessage.textContent = '対戦相手を待っています...';
+        // ホスト側（create-viewが表示中）ならそのまま待機
+        // 参加者として入った場合はゲーム画面に遷移
+        if (data.playerIndex === 1) {
+            // 2人目のプレイヤーとして参加した場合はゲーム画面へ
+            screens.login.classList.add('hidden');
+            screens.game.classList.remove('hidden');
+            elements.roleDisplay.textContent = `あなたは Player ${myPlayerIndex + 1}`;
+            renderBoard(data.board);
+            updateScores(data.players);
+            updateTurn(data.turnIndex);
+        }
+        return;
+    }
+
+    // ゲームが既に進行中の場合のみ画面切り替え
+    screens.login.classList.add('hidden');
+    screens.game.classList.remove('hidden');
 
     // 役割表示
     if (data.role === 'spectator') {
@@ -171,15 +188,15 @@ socket.on('room_joined', (data) => {
 
     // ターン表示更新
     updateTurn(data.turnIndex);
-
-    // ゲーム状態によるメッセージ更新
-    if (data.gameState === 'waiting') {
-        elements.statusMessage.textContent = '対戦相手を待っています...';
-    }
 });
 
 // ゲーム開始
 socket.on('game_start', (data) => {
+    // ホスト側をゲーム画面に切り替え
+    screens.login.classList.add('hidden');
+    screens.game.classList.remove('hidden');
+    elements.roleDisplay.textContent = `あなたは Player ${myPlayerIndex + 1}`;
+
     elements.statusMessage.textContent = 'ゲーム開始！';
     renderBoard(data.board);
     updateTurn(data.turnIndex);
