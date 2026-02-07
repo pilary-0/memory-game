@@ -1,10 +1,17 @@
 :root {
-    --primary-color: #4CAF50;
-    --bg-color: #f0f2f5;
-    --card-back: #2196F3;
-    --card-hover: #1976D2;
-    --text-color: #333;
-    --active-player: #ffeb3b;
+    --primary-color: #ff4081;
+    /* Vibrant Pink */
+    --secondary-color: #00e5ff;
+    /* Bright Cyan */
+    --accent-color: #ffab40;
+    /* Orange */
+    --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --card-back: linear-gradient(45deg, #00c6ff 0%, #0072ff 100%);
+    --card-hover: linear-gradient(45deg, #00d2ff 0%, #3a7bd5 100%);
+    --text-color: #ffffff;
+    --panel-bg: rgba(255, 255, 255, 0.1);
+    --glass-bg: rgba(255, 255, 255, 0.2);
+    --glass-border: rgba(255, 255, 255, 0.1);
 }
 
 * {
@@ -14,13 +21,15 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--bg-color);
+    font-family: 'Outfit', 'Segoe UI', sans-serif;
+    background: var(--bg-gradient);
+    background-attachment: fixed;
     color: var(--text-color);
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 #app {
@@ -30,11 +39,27 @@ body {
 }
 
 .screen {
-    background: white;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 2.5rem;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     text-align: center;
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .hidden {
@@ -50,78 +75,84 @@ body {
 }
 
 .big-btn {
-    padding: 15px;
-    font-size: 1.2rem;
-    border-radius: 8px;
+    padding: 16px;
+    font-size: 1.1rem;
+    border-radius: 12px;
     border: none;
     cursor: pointer;
-    background-color: var(--primary-color);
+    background: var(--primary-color);
     color: white;
-    font-weight: bold;
+    font-weight: 700;
     width: 100%;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 15px rgba(255, 64, 129, 0.4);
+}
+
+.big-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(255, 64, 129, 0.6);
 }
 
 .big-btn.secondary {
-    background-color: var(--card-back);
+    background: var(--secondary-color);
+    box-shadow: 0 4px 15px rgba(0, 229, 255, 0.4);
+}
+
+.big-btn.secondary:hover {
+    box-shadow: 0 6px 20px rgba(0, 229, 255, 0.6);
 }
 
 .sub-screen {
     margin-top: 20px;
-    animation: fadeIn 0.3s;
 }
 
 .room-id-box {
-    font-size: 2rem;
-    font-weight: bold;
-    background: #eee;
-    padding: 15px;
-    border-radius: 8px;
-    margin: 10px 0;
-    letter-spacing: 5px;
-    user-select: all;
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    border: 2px dashed #4CAF50;
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    margin: 15px 0;
+    letter-spacing: 8px;
+    color: var(--secondary-color);
+    border: 2px solid var(--secondary-color);
+    text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
 }
 
 .action-btn {
     width: 100%;
-    margin-bottom: 10px;
-    padding: 12px;
+    margin-bottom: 12px;
+    padding: 14px;
     font-size: 1rem;
-    background-color: var(--primary-color);
+    background: var(--primary-color);
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 10px;
     cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.action-btn:hover {
+    opacity: 0.9;
+    transform: scale(1.01);
 }
 
 .back-link {
     background: none;
     border: none;
-    color: #666;
-    text-decoration: underline;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
     cursor: pointer;
     font-size: 0.9rem;
-    margin-top: 10px;
+    margin-top: 15px;
+    display: inline-block;
+    transition: 0.3s;
 }
 
-.instruction {
-    margin-bottom: 15px;
-    color: #555;
-    font-size: 0.9rem;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.back-link:hover {
+    color: white;
+    text-decoration: underline;
 }
 
 /* ゲーム画面 */
@@ -162,85 +193,81 @@ body {
 }
 
 .player-card {
-    background: #eee;
-    padding: 10px 20px;
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 15px;
     position: relative;
     width: 45%;
-    transition: all 0.3s;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid var(--glass-border);
 }
 
 .player-card.active {
     background: var(--primary-color);
     color: white;
-    /* transform: scale(1.05); */
-    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    transform: scale(1.08);
+    box-shadow: 0 0 20px rgba(255, 64, 129, 0.4);
+    z-index: 10;
 }
 
 .player-card .name {
     display: block;
-    font-size: 0.8rem;
-    margin-bottom: 4px;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
 }
 
 .player-card .score {
-    font-size: 1.5rem;
-    font-weight: bold;
+    font-size: 2rem;
+    font-weight: 800;
 }
 
 /* ゲームボード（カード一覧） */
 .game-board {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    gap: 12px;
     aspect-ratio: 1;
-    /* 正方形を維持 */
+    perspective: 1000px;
 }
 
 .card {
-    background-color: var(--card-back);
-    border-radius: 8px;
-    border: 2px solid transparent;
+    background: var(--card-back);
+    border-radius: 12px;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2rem;
-    color: white;
-    user-select: none;
-    transition: transform 0.3s, background-color 0.3s;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
+    transform-style: preserve-3d;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .card:hover {
-    background-color: var(--card-hover);
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
 .card.flipped,
 .card.matched {
-    background-color: white;
-    color: #333;
-    border: 2px solid var(--primary-color);
-    cursor: default;
+    background: white;
     transform: rotateY(180deg);
-    /* 簡易的な回転演出 */
+    cursor: default;
 }
 
-/* カードの中身は最初隠すのではなく、JSで制御するが、
-   CSSだけで裏面を表現する場合は以下のような工夫が必要。
-   今回はシンプルに、.flipped クラスがついたらテキストを表示する方式にする。
-*/
-/* カードの内容を絶対配置にして、サイズ変化によるガタつきを完全防止 */
 .card span {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) rotateY(180deg);
     opacity: 0;
-    transition: opacity 0.3s;
-    font-size: 2.5rem;
-    /* 絵文字サイズ固定 */
+    transition: opacity 0.3s ease;
+    font-size: 3rem;
     line-height: 1;
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
 }
 
 .card.flipped span,
@@ -249,7 +276,22 @@ body {
 }
 
 .card.matched {
-    opacity: 0.6;
+    opacity: 0.5;
+    animation: matchSuccess 0.5s ease-out;
+}
+
+@keyframes matchSuccess {
+    0% {
+        transform: rotateY(180deg) scale(1);
+    }
+
+    50% {
+        transform: rotateY(180deg) scale(1.2);
+    }
+
+    100% {
+        transform: rotateY(180deg) scale(1);
+    }
 }
 
 .role-badge {

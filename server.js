@@ -51,22 +51,34 @@ function createBoard() {
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
-    // ルームに参加
-    socket.on('join_room', ({ roomId, userId }) => {
-        if (!rooms[roomId]) {
-            // ルームが存在しない場合、新規作成
-            rooms[roomId] = {
-                players: [],
-                spectators: [],
-                board: createBoard(),
-                turnIndex: 0,
-                flippedCards: [],
-                gameState: 'waiting',
-                timer: null
-            };
+    // ルームを作成（ホストのみ）
+    socket.on('create_room', ({ roomId }) => {
+        if (rooms[roomId]) {
+            socket.emit('error_message', { message: 'そのルームIDは既に使用されています' });
+            return;
         }
 
+        rooms[roomId] = {
+            players: [],
+            spectators: [],
+            board: createBoard(),
+            turnIndex: 0,
+            flippedCards: [],
+            gameState: 'waiting',
+            timer: null
+        };
+        console.log(`Room created: ${roomId}`);
+        socket.emit('room_created', { roomId });
+    });
+
+    // ルームに参加
+    socket.on('join_room', ({ roomId, userId }) => {
         const room = rooms[roomId];
+        if (!room) {
+            socket.emit('error_message', { message: 'ルームが見つかりません。IDを確認してください。' });
+            return;
+        }
+
         let role = 'spectator';
         let playerIndex = -1;
 

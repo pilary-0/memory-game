@@ -44,13 +44,29 @@ document.getElementById('mode-create').addEventListener('click', () => {
     const newRoomId = Math.floor(100000 + Math.random() * 900000).toString();
     currentRoomId = newRoomId;
 
+    // サーバーにルーム作成を依頼
+    socket.emit('create_room', { roomId: newRoomId });
+});
+
+// ルーム作成成功時の処理
+socket.on('room_created', (data) => {
+    currentRoomId = data.roomId;
     // UI切り替え
     document.querySelector('.menu-actions').classList.add('hidden');
     document.getElementById('create-view').classList.remove('hidden');
-    document.getElementById('generated-room-id').textContent = newRoomId;
+    document.getElementById('generated-room-id').textContent = data.roomId;
 
     // 自動的に入室 (待機状態)
-    socket.emit('join_room', { roomId: newRoomId, userId });
+    socket.emit('join_room', { roomId: data.roomId, userId });
+});
+
+// エラー受取
+socket.on('error_message', (data) => {
+    alert(data.message);
+    // もし入室中ならホームに戻るなどの処理
+    if (data.message.includes('見つかりません')) {
+        backToHome();
+    }
 });
 
 // 「ルームに参加する」ボタン
@@ -195,6 +211,9 @@ socket.on('match_result', (data) => {
         // スコア更新
         elements.players[0].score.textContent = data.scores[0];
         elements.players[1].score.textContent = data.scores[1];
+
+        // 小さな紙吹雪（オプション：今回は大げさすぎる場合は調整）
+        if (window.confetti) window.confetti.trigger();
     }
 });
 
@@ -221,6 +240,9 @@ socket.on('game_over', (data) => {
     elements.modal.classList.remove('hidden');
     elements.winnerText.textContent =
         data.winner === 'draw' ? '引き分け！' : `勝者: ${data.winner}`;
+
+    // 勝利時の盛大な紙吹雪
+    if (window.confetti) window.confetti.trigger();
 });
 
 // ゲームリセット（再戦）
