@@ -22,17 +22,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 // }
 const rooms = {};
 
-// カードの画像（8ペア）- 画像ファイルのパスを使用
-const IMAGES = [
-    '/images/Glory4lyfeWoods_map_v4_marked_10.png',
-    '/images/Google_AI_Studio_2026-01-03T02_07_04.116Z.png',
-    '/images/c6552090-17ec-45a8-957e-83e6b1a4cf9a.png',
-    '/images/f2fbc8d9-a495-46ce-b57e-aafa5ac72b21.png',
-    '/images/f7c45c57-df7e-473c-8237-0255b10177be (1).png',
-    '/images/f7c45c57-df7e-473c-8237-0255b10177be.png',
-    '/images/pirari.png',
-    '/images/カレーパンマン.png'
+// 動物の絵文字リスト（20種類）
+const EMOJIS = [
+    '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯',
+    '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🐤', '🦆'
 ];
+
+// プレイヤー人数に応じたペア数を決定
+function getPairCount(playerCount) {
+    if (playerCount === 2) return 8;  // 16枚
+    if (playerCount === 3) return 12; // 24枚
+    if (playerCount === 4) return 16; // 32枚
+    if (playerCount === 5) return 20; // 40枚
+    return 8; // デフォルト
+}
 
 // シャッフル関数
 function shuffle(array) {
@@ -44,13 +47,15 @@ function shuffle(array) {
 }
 
 // 新しいゲームボードを作成
-function createBoard() {
+function createBoard(pairCount) {
     const cards = [];
-    // 8種類の画像を2枚ずつ追加
-    [...IMAGES, ...IMAGES].forEach((image, index) => {
+    const selectedEmojis = EMOJIS.slice(0, pairCount);
+
+    // 選ばれた絵文字を2枚ずつ追加
+    [...selectedEmojis, ...selectedEmojis].forEach((emoji, index) => {
         cards.push({
             id: index,
-            value: image,
+            value: emoji,
             state: 'hidden' // hidden, flipped, matched
         });
     });
@@ -70,11 +75,12 @@ io.on('connection', (socket) => {
         rooms[roomId] = {
             players: [],
             spectators: [],
-            board: createBoard(),
+            board: [], // ゲーム開始時に生成
             turnIndex: 0,
             flippedCards: [],
             gameState: 'waiting',
-            timer: null
+            timer: null,
+            hostId: socket.id // ホストのSocketIDを記録
         };
         console.log(`Room created: ${roomId}`);
         socket.emit('room_created', { roomId });
@@ -102,11 +108,13 @@ io.on('connection', (socket) => {
             role = 'player';
             playerIndex = existingPlayerIndex;
 
-            // 相手に再接続を通知
+            // もしホストが切断して再接続した場合、ホスト権限を戻すか？
+            // 簡易的に、最初のプレイヤー(index 0)をホストとみなすロジックにするなら特に処理不要
+
             socket.to(roomId).emit('player_reconnected', { playerIndex });
 
-        } else if (room.players.length < 2) {
-            // 新規プレイヤー参加
+        } else if (room.gameState === 'waiting' && room.players.length < 5) {
+            // 新規プレイヤー参加 (待機中かつ5人未満)
             role = 'player';
             playerIndex = room.players.length;
             room.players.push({
@@ -117,13 +125,16 @@ io.on('connection', (socket) => {
                 name: `Player ${playerIndex + 1}`
             });
         } else {
-            // 観戦者として参加
+            // 観戦者として参加（満員またはゲーム中）
             room.spectators.push(socket.id);
         }
 
         socket.join(roomId);
 
         // 参加者への現在のルーム状態通知
+        // ホストかどうかを判定 (Player 1 がホスト)
+        const isHost = (playerIndex === 0);
+
         socket.emit('room_joined', {
             roomId,
             role,
@@ -131,17 +142,45 @@ io.on('connection', (socket) => {
             gameState: room.gameState,
             board: room.board,
             players: room.players.map(p => ({ score: p.score, name: p.name, connected: p.connected })),
-            turnIndex: room.turnIndex
+            turnIndex: room.turnIndex,
+            isHost: isHost
         });
 
-        // 対戦相手が揃ったらゲーム開始
-        if (room.gameState === 'waiting' && room.players.length === 2) {
-            room.gameState = 'playing';
-            io.to(roomId).emit('game_start', {
-                board: room.board,
-                turnIndex: room.turnIndex
-            });
+        // 全員に参加者を通知（人数更新のため）
+        io.to(roomId).emit('player_update', {
+            players: room.players.map(p => ({ score: p.score, name: p.name, connected: p.connected }))
+        });
+    });
+
+    // ゲーム開始要求（ホストのみ）
+    socket.on('start_game', ({ roomId }) => {
+        const room = rooms[roomId];
+        if (!room) return;
+
+        // ホスト（Player 0）からの要求か確認
+        // 簡易的に players[0].id と一致するかで判定
+        if (room.players.length === 0 || room.players[0].id !== socket.id) {
+            return;
         }
+
+        if (room.players.length < 2) {
+            socket.emit('error_message', { message: '対戦相手がいません' });
+            return;
+        }
+
+        // ゲーム初期化
+        const pairCount = getPairCount(room.players.length);
+        room.board = createBoard(pairCount);
+        room.gameState = 'playing';
+        room.turnIndex = 0;
+        room.flippedCards = [];
+        room.players.forEach(p => p.score = 0); // スコアリセット
+
+        io.to(roomId).emit('game_start', {
+            board: room.board,
+            turnIndex: room.turnIndex,
+            players: room.players.map(p => ({ score: 0, name: p.name, connected: p.connected }))
+        });
     });
 
     // カードをめくる
@@ -192,20 +231,25 @@ io.on('connection', (socket) => {
                 io.to(roomId).emit('match_result', {
                     success: true,
                     matchedCards: [first.index, second.index],
-                    scores: room.players.map(p => p.score)
+                    scores: room.players.map(p => p.score),
+                    turnIndex: room.turnIndex // ターンは変わらない
                 });
 
                 // ゲーム終了判定
                 const isGameOver = room.board.every(c => c.state === 'matched');
                 if (isGameOver) {
                     room.gameState = 'finished';
-                    // 勝者判定
-                    let winner = 'draw';
-                    if (room.players[0].score > room.players[1].score) winner = 'Player 1';
-                    else if (room.players[1].score > room.players[0].score) winner = 'Player 2';
+                    // 勝者判定（最高得点者、複数可）
+                    const maxScore = Math.max(...room.players.map(p => p.score));
+                    const winners = room.players
+                        .filter(p => p.score === maxScore)
+                        .map(p => p.name);
+
+                    let winnerText = winners.join(', ');
+                    if (winners.length > 1) winnerText += ' (引き分け)';
 
                     io.to(roomId).emit('game_over', {
-                        winner,
+                        winner: winnerText,
                         scores: room.players.map(p => p.score)
                     });
                 }
@@ -213,23 +257,20 @@ io.on('connection', (socket) => {
 
             } else {
                 // 不正解
-
-                // 少し待ってから裏返す処理
-                // タイマーを設定して、他の操作をブロックする意図もあるが、
-                // 今回はシンプルにクライアント側でもアニメーション時間を考慮させる。
-                // サーバー側で一定時間後に「裏返し＆ターン交代」イベントを送る。
-
-                // タイムアウト待ち中に他の操作を受け付けないようにするには？
-                // flippedCardsが残っている間は次のflipを受け付けないガードが入っているのでOK。
-
                 room.timer = setTimeout(() => {
                     // カードを裏返す
                     room.board[first.index].state = 'hidden';
                     room.board[second.index].state = 'hidden';
                     room.flippedCards = [];
 
-                    // ターン交代
-                    room.turnIndex = (room.turnIndex + 1) % 2;
+                    // ターン交代 (次の人へ、人数で割った余り)
+                    const nextTurnIndex = (room.turnIndex + 1) % room.players.length;
+
+                    // 次のプレイヤーが接続断の場合はさらに次へ飛ばす処理（簡易実装）
+                    // 厳密にはwhileループでconnectedなプレイヤーを探すべきだが、今回はシンプルに
+                    // 誰もいなければ何もしない等は考慮が必要だが、再接続も考慮してそのまま回す
+
+                    room.turnIndex = nextTurnIndex;
 
                     io.to(roomId).emit('turn_change', {
                         turnIndex: room.turnIndex,
@@ -242,15 +283,19 @@ io.on('connection', (socket) => {
         }
     });
 
-
-
-    // 再戦要求（リセット）
+    // 再戦要求（リセット） - ホストのみ可能にするか？今回は誰でも押せる仕様のまま、ただし全員合意ではなく即時リセット
     socket.on('request_rematch', ({ roomId }) => {
         const room = rooms[roomId];
         if (!room) return;
 
-        // ゲーム状態をリセット
-        room.board = createBoard();
+        // ホストのみ再戦可能にするならここでチェックを入れる
+
+        // 新しいボードを作成（人数は現在のプレイヤー数で）
+        // プレイヤーが減っている可能性もあるのでフィルタリングするか？
+        // ここでは単純に現在の room.players.length を使う
+        const pairCount = getPairCount(room.players.length);
+        room.board = createBoard(pairCount);
+
         room.flippedCards = [];
         room.turnIndex = 0; // Player 1 から開始
         room.gameState = 'playing';
@@ -263,7 +308,7 @@ io.on('connection', (socket) => {
         io.to(roomId).emit('game_reset', {
             board: room.board,
             turnIndex: room.turnIndex,
-            players: room.players.map(p => ({ score: 0 }))
+            players: room.players.map(p => ({ score: 0, name: p.name, connected: p.connected }))
         });
     });
 
@@ -279,9 +324,26 @@ io.on('connection', (socket) => {
         const player = room.players.find(p => p.id === socket.id);
         if (player) {
             player.connected = false;
-            io.to(roomId).emit('player_disconnected', {
-                playerIndex: room.players.indexOf(player)
-            });
+            // プレイヤーリストから削除はしない（再入室のID管理が複雑になるため、切断扱いにする）
+            // ただし、ゲーム開始前なら削除しても良いかもしれない。
+            // 今回は「切断」扱い統一でシンプルに。
+
+            // ゲーム開始前なら配列から消す？ -> 5人枠を空けるため必要。
+            if (room.gameState === 'waiting') {
+                const idx = room.players.indexOf(player);
+                room.players.splice(idx, 1);
+                // 名前を振り直す（Player 1, 2...）
+                room.players.forEach((p, i) => p.name = `Player ${i + 1}`);
+
+                // 更新通知
+                io.to(roomId).emit('player_update', {
+                    players: room.players.map(p => ({ score: p.score, name: p.name, connected: p.connected }))
+                });
+            } else {
+                io.to(roomId).emit('player_disconnected', {
+                    playerIndex: room.players.indexOf(player)
+                });
+            }
         }
         // 観戦者の場合
         else {
@@ -294,22 +356,30 @@ io.on('connection', (socket) => {
 
     // 切断処理
     socket.on('disconnect', () => {
-        // 所属していたルームを探す
-        // roomsはroomIdキーのオブジェクトなのでループで探す（効率は良くないが今回は小規模なのでOK）
         for (const roomId in rooms) {
             const room = rooms[roomId];
             const player = room.players.find(p => p.id === socket.id);
 
             if (player) {
                 console.log(`Player disconnected from room ${roomId}`);
-                player.connected = false; // 切断状態にするが削除はしない
-                io.to(roomId).emit('player_disconnected', {
-                    playerIndex: room.players.indexOf(player)
-                });
+                player.connected = false;
 
-                // もし両方とも長期間いない場合などのクリーンアップ処理は今回は省略
+                if (room.gameState === 'waiting') {
+                    // 待機中なら削除
+                    const idx = room.players.indexOf(player);
+                    room.players.splice(idx, 1);
+                    room.players.forEach((p, i) => p.name = `Player ${i + 1}`);
+
+                    io.to(roomId).emit('player_update', {
+                        players: room.players.map(p => ({ score: p.score, name: p.name, connected: p.connected }))
+                    });
+                } else {
+                    // ゲーム中なら切断状態通知
+                    io.to(roomId).emit('player_disconnected', {
+                        playerIndex: room.players.indexOf(player)
+                    });
+                }
             } else {
-                // 観戦者の削除
                 const spectatorIndex = room.spectators.indexOf(socket.id);
                 if (spectatorIndex !== -1) {
                     room.spectators.splice(spectatorIndex, 1);

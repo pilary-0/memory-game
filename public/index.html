@@ -28,6 +28,16 @@
                 <div class="room-id-box" id="generated-room-id">---</div>
                 <p class="instruction">この番号を相手に教えてください</p>
                 <button id="copy-btn" class="action-btn">IDをコピー</button>
+
+                <div class="waiting-area">
+                    <p id="player-count">参加者: 1人</p>
+                    <ul id="player-list-lobby">
+                        <!-- 参加者リスト（ロビー） -->
+                    </ul>
+                </div>
+
+                <button id="start-game-btn" class="action-btn hidden" disabled>ゲーム開始</button>
+
                 <div class="waiting-spinner">対戦相手を待っています...</div>
                 <button class="back-link">戻る</button>
             </div>
@@ -46,19 +56,10 @@
                 <div class="room-info">Room: <span id="room-id-display"></span></div>
                 <button id="leave-btn" class="leave-btn">退出</button>
             </div>
-            <div id="status-message" class="status-bar">対戦相手を待っています...</div>
+            <div id="status-message" class="status-bar">ゲームの準備中...</div>
 
-            <div class="scoreboard">
-                <div class="player-card" id="p1-card">
-                    <span class="name">Player 1</span>
-                    <span class="score" id="p1-score">0</span>
-                    <span class="indicator"></span>
-                </div>
-                <div class="player-card" id="p2-card">
-                    <span class="name">Player 2</span>
-                    <span class="score" id="p2-score">0</span>
-                    <span class="indicator"></span>
-                </div>
+            <div class="scoreboard" id="scoreboard">
+                <!-- プレイヤーカードはJSで動的に生成 -->
             </div>
 
             <div class="game-board" id="board">

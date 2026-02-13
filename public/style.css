@@ -300,28 +300,24 @@ body {
     cursor: default;
 }
 
-/* カード内の画像スタイル */
-.card img {
-    position: absolute;
-    top: 0;
-    left: 0;
+/* カード内の絵文字スタイル */
+.card span {
+    display: block;
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    /* 比率を維持してカード内に収める */
-    object-position: center center;
-    /* 画像の中心を表示 */
-    padding: 10px;
-    box-sizing: border-box;
+    font-size: 3rem;
+    line-height: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     transform: rotateY(180deg);
+    /* カードが裏返ったときに正しい向きになるように */
     opacity: 0;
     transition: opacity 0.3s ease;
-    background: white;
-    border-radius: 8px;
 }
 
-.card.flipped img,
-.card.matched img {
+.card.flipped span,
+.card.matched span {
     opacity: 1;
 }
 
